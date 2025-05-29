@@ -1,0 +1,16 @@
+torch
+torchvision
+transformers<4.52
+accelerate
+tqdm
+tyro
+opencv-python
+scikit-image
+numpy
+pillow
+transformers
+qwen-vl-utils
+gradio
+braceexpand
+scikit-learn
+
