@@ -9,7 +9,10 @@
     <a href='https://mirlab.yonsei.ac.kr/' target='_blank'>Youngjae Yu</a>
 </p>
 
-[![arXiv](https://img.shields.io/badge/arXiv-2505.18842-b31b1b.svg)](https://arxiv.org/abs/2505.18842) [![HuggingFace](https://img.shields.io/badge/%F0%9F%A4%97%20Hugging%20Face-kjunh/v1--7B-FFD21E)](https://huggingface.co/kjunh/v1-7B)
+[![arXiv](https://img.shields.io/badge/arXiv-2505.18842-b31b1b.svg)](https://arxiv.org/abs/2505.18842) 
+[![Model](https://img.shields.io/badge/%F0%9F%A4%97%20Model-kjunh/v1--7B-blue)](https://huggingface.co/kjunh/v1-7B) 
+[![Data](https://img.shields.io/badge/%F0%9F%A4%97%20Dataset-v1g--sample-green)](https://huggingface.co/datasets/kjunh/v1g-sample)
+
 
 <p align="center">
   <img src="assets/figure.png">
@@ -42,8 +45,18 @@ python inference.py
 ```
 The script uses a default image URL and text prompt. To use your own inputs, you can modify the `image` variable within the `messages` list and the `text` field for the user prompt.
 
+## Data
+We have released a [100-item sample of our v1g dataset](https://huggingface.co/datasets/kjunh/v1g-sample) on the Hugging Face Hub. You can load it easily using the `datasets` library:
+
+```python
+from datasets import load_dataset
+
+ds = load_dataset("kjunh/v1g-sample")
+```
+
 ## Coming Soon
 - [x] Inference code
+- [x] Training data sample
 - [ ] Training data
 - [ ] Evaluation code
 - [ ] Training code
