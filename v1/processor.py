@@ -447,7 +447,6 @@ class V1Processor(Qwen2_5_VLProcessor):
 
 
 def get_processor(model_name: str, **kwargs):
-    import ipdb; ipdb.set_trace()
     processor = V1Processor.from_pretrained(model_name, **kwargs)
     processor.image_processor = Qwen2VLImagePointerProcessor.from_pretrained(
         model_name, **kwargs
