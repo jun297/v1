@@ -1,4 +1,4 @@
-# Don't Look Only Once: Towards Multimodal Interactive Reasoning with Selective Visual Revisitation  
+# v1: Learning to Point Visual Tokens <br> for Multimodal Grounded Reasoning
 
 <p align="left">
     <a href='https://jiwanchung.github.io/' target='_blank'>Jiwan Chung<sup>*</sup></a>&emsp;
@@ -61,12 +61,11 @@ ds = load_dataset("kjunh/v1g-sample")
 - [ ] Evaluation code
 - [ ] Training code
 
-
 ## Citation
 If you find our work valuable, please cite:
 ```bibtex
-@misc{chung2025dontlookoncemultimodal,
-      title={Don't Look Only Once: Towards Multimodal Interactive Reasoning with Selective Visual Revisitation}, 
+@misc{chung2025v1learningpointvisual,
+      title={v1: Learning to Point Visual Tokens for Multimodal Grounded Reasoning}, 
       author={Jiwan Chung and Junhyeok Kim and Siyeol Kim and Jaeyoung Lee and Min Soo Kim and Youngjae Yu},
       year={2025},
       eprint={2505.18842},
