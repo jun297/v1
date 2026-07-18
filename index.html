@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>v1 — Learning to Point Visual Tokens for Multimodal Grounded Reasoning</title>
+<meta name="description" content="v1 is a lightweight extension for active visual referencing via point-and-copy: the model selects relevant image patches and copies their embeddings back into the reasoning stream. COLM 2026.">
+<meta property="og:title" content="v1: Learning to Point Visual Tokens for Multimodal Grounded Reasoning">
+<meta property="og:description" content="Point-and-copy: revisit visual evidence while reasoning. Accepted at COLM 2026.">
+<meta property="og:image" content="https://jun297.github.io/v1/assets/figure.png">
+<meta property="og:type" content="website">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;600&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<header class="hero">
+  <p class="eyebrow">COLM 2026 &middot; Yonsei University</p>
+
+  <div class="wordmark" aria-hidden="true">
+    <span class="wordmark-box">
+      v1
+      <span class="handle h-tl"></span><span class="handle h-tr"></span>
+      <span class="handle h-bl"></span><span class="handle h-br"></span>
+      <span class="wordmark-label">detect("v1")</span>
+    </span>
+  </div>
+
+  <h1 class="subtitle">Learning to Point Visual Tokens<br>for Multimodal Grounded Reasoning</h1>
+
+  <p class="authors">
+    <a href="https://jiwanchung.github.io/">Jiwan Chung</a><sup>*</sup> &middot;
+    <a href="https://junhyeok.kim/">Junhyeok Kim</a><sup>*</sup> &middot;
+    <a href="https://scholar.google.com/citations?user=w3hOuRoAAAAJ">Siyeol Kim</a> &middot;
+    <a href="https://jaeyoung-l.github.io/">Jaeyoung Lee</a> &middot;
+    <a href="https://scholar.google.com/citations?user=Og3gN_AAAAAJ">Minsoo Kim</a> &middot;
+    <a href="https://mirlab.yonsei.ac.kr/">Youngjae Yu</a>
+  </p>
+  <p class="affil"><sup>*</sup> equal contribution &middot; MIR Lab, Yonsei University</p>
+
+  <nav class="links" aria-label="Paper resources">
+    <a class="btn" href="https://arxiv.org/abs/2505.18842">arXiv</a>
+    <a class="btn" href="https://github.com/jun297/v1">Code</a>
+    <a class="btn" href="https://huggingface.co/kjunh/v1-7B">Model</a>
+    <a class="btn" href="https://huggingface.co/datasets/kjunh/v1g">Data</a>
+    <a class="btn" href="#bibtex">BibTeX</a>
+  </nav>
+</header>
+
+<main>
+
+<figure class="teaser">
+  <img src="assets/figure.png" alt="Overview of v1: while reasoning, the model points at relevant image patches and copies their embeddings back into the reasoning stream.">
+  <figcaption>Most multimodal language models encode an image once, then reason purely in text. v1 keeps looking: it points at the patches that matter and copies them back into its chain of thought.</figcaption>
+</figure>
+
+<section class="section" id="pointcopy">
+  <p class="eyebrow">point-and-copy</p>
+  <h2>Reasoning that revisits the image</h2>
+  <p class="lede">A real trace from the <a href="https://huggingface.co/datasets/kjunh/v1g">v1g</a> training set. As the model works through the problem, each <code class="inline">detect(&hellip;)</code> call grounds the next step in a region of the image. <span class="hint">Hover or focus an <span class="obj-demo">&#10216;obj&#10217;</span> token to see where it points.</span></p>
+
+  <div class="demo">
+    <div class="demo-image">
+      <p class="task"><span class="task-tag">task</span> AB is tangent to circle O at A, and &ang;AOB&nbsp;=&nbsp;70&deg;. Find &ang;B. <span class="choices">A:&nbsp;10&deg; &nbsp;B:&nbsp;20&deg; &nbsp;C:&nbsp;30&deg; &nbsp;D:&nbsp;35&deg;</span></p>
+      <svg viewBox="0 0 280 168" role="img" aria-label="Geometry diagram: circle O with tangent line AB touching at point A">
+        <image href="assets/sample_748.png" x="0" y="0" width="280" height="168" preserveAspectRatio="none"/>
+        <rect id="box-1" class="box box-1" x="70"  y="19" width="140" height="141"/>
+        <rect id="box-2" class="box box-2" x="128" y="59" width="82"  height="73"/>
+        <rect id="box-3" class="box box-3" x="23"  y="0"  width="234" height="156"/>
+        <rect id="box-4" class="box box-4" x="23"  y="0"  width="256" height="167"/>
+        <rect id="box-5" class="box box-5" x="0"   y="0"  width="279" height="167"/>
+      </svg>
+    </div>
+
+    <div class="demo-trace">
+      <p>I know that a tangent to a circle is perpendicular to the radius at the point of tangency. So, I need to look at the tangent line AB.</p>
+      <p class="detect">detect(query="tangent line AB", objects=[<button class="obj obj-1" data-obj="1">&#10216;obj1&#10217;</button>])</p>
+      <p>Since <button class="obj obj-1" data-obj="1">&#10216;obj1&#10217;</button> is tangent to the circle at point A, then OA, which is the radius, should be perpendicular to it. Let me find radius OA.</p>
+      <p class="detect">detect(query="radius OA", objects=[<button class="obj obj-2" data-obj="2">&#10216;obj2&#10217;</button>])</p>
+      <p>That means angle OAB is 90 degrees.</p>
+      <p class="detect">detect(query="angle OAB", objects=[<button class="obj obj-3" data-obj="3">&#10216;obj3&#10217;</button>])<br>detect(query="angle AOB", objects=[<button class="obj obj-4" data-obj="4">&#10216;obj4&#10217;</button>])<br>detect(query="triangle AOB", objects=[<button class="obj obj-5" data-obj="5">&#10216;obj5&#10217;</button>])</p>
+      <p class="conclusion">In a right triangle <button class="obj obj-5" data-obj="5">&#10216;obj5&#10217;</button>, the sum of the angles is 180 degrees. So, angle B = 180&deg; &minus; <button class="obj obj-3" data-obj="3">&#10216;obj3&#10217;</button> &minus; <button class="obj obj-4" data-obj="4">&#10216;obj4&#10217;</button> = 180&deg; &minus; 90&deg; &minus; 70&deg; = <strong>20&deg;</strong>. <span class="answer">&#10003; B</span></p>
+    </div>
+  </div>
+</section>
+
+<section class="section" id="abstract">
+  <p class="eyebrow">abstract</p>
+  <h2>Why point-and-copy</h2>
+  <p class="abstract-text">When thinking with images, humans rarely rely on a single glance: they revisit visual evidence while reasoning. In contrast, most Multimodal Language Models encode an image once to key-value cache and then reason purely in text, making it hard to re-ground intermediate steps. We empirically confirm this: as reasoning chains lengthen, models progressively lose focus on relevant regions. We introduce <strong>v1</strong>, a lightweight extension for active visual referencing via <strong>point-and-copy</strong>: the model selects relevant image patches and copies their embeddings back into the reasoning stream. Crucially, our point-and-copy mechanism retrieves patches using their semantic representations as keys, ensuring perceptual evidence remains aligned with the reasoning space. To train this behavior, we build <strong>v1g</strong>, a dataset of 300K multimodal reasoning traces with interleaved grounding annotations. Across multimodal mathematical reasoning benchmarks, v1 consistently outperforms comparable baselines.</p>
+</section>
+
+<section class="section" id="resources">
+  <p class="eyebrow">artifacts</p>
+  <h2>Everything is released</h2>
+  <div class="cards">
+    <a class="card" href="https://huggingface.co/kjunh/v1-7B">
+      <span class="card-kind">model</span>
+      <span class="card-name">kjunh/v1-7B</span>
+      <span class="card-desc">v1 on Qwen2.5-VL-7B, ready for inference and the Gradio demo.</span>
+    </a>
+    <a class="card" href="https://huggingface.co/datasets/kjunh/v1g">
+      <span class="card-kind">dataset</span>
+      <span class="card-name">kjunh/v1g</span>
+      <span class="card-desc">300K reasoning traces with interleaved grounding annotations.</span>
+    </a>
+    <a class="card" href="https://github.com/jun297/v1">
+      <span class="card-kind">code</span>
+      <span class="card-name">jun297/v1</span>
+      <span class="card-desc">Inference, Gradio demo, and full training code.</span>
+    </a>
+  </div>
+</section>
+
+<section class="section" id="bibtex">
+  <p class="eyebrow">cite</p>
+  <h2>BibTeX</h2>
+  <div class="bibtex-wrap">
+    <button class="copy-btn" id="copy-bib" aria-label="Copy BibTeX">copy</button>
+<pre id="bib">@misc{chung2025v1learningpointvisual,
+  title={v1: Learning to Point Visual Tokens for Multimodal Grounded Reasoning},
+  author={Jiwan Chung and Junhyeok Kim and Siyeol Kim and Jaeyoung Lee
+          and Min Soo Kim and Youngjae Yu},
+  year={2025},
+  eprint={2505.18842},
+  archivePrefix={arXiv},
+  primaryClass={cs.CL},
+  url={https://arxiv.org/abs/2505.18842},
+}</pre>
+  </div>
+</section>
+
+</main>
+
+<footer>
+  <p><a href="https://mirlab.yonsei.ac.kr/">MIR Lab</a>, Yonsei University &middot; Released under <a href="https://github.com/jun297/v1/blob/main/LICENSE">Apache-2.0</a></p>
+</footer>
+
+<script>
+  const boxes = {};
+  document.querySelectorAll(".box").forEach(b => { boxes[b.id.slice(4)] = b; });
+  const svg = document.querySelector(".demo-image svg");
+  document.querySelectorAll(".obj[data-obj]").forEach(chip => {
+    const id = chip.dataset.obj;
+    const on  = () => { svg.classList.add("focused"); boxes[id].classList.add("active"); };
+    const off = () => { svg.classList.remove("focused"); boxes[id].classList.remove("active"); };
+    chip.addEventListener("mouseenter", on);
+    chip.addEventListener("mouseleave", off);
+    chip.addEventListener("focus", on);
+    chip.addEventListener("blur", off);
+  });
+  document.getElementById("copy-bib").addEventListener("click", async (e) => {
+    await navigator.clipboard.writeText(document.getElementById("bib").textContent);
+    e.target.textContent = "copied";
+    setTimeout(() => { e.target.textContent = "copy"; }, 1500);
+  });
+</script>
+
+</body>
+</html>
