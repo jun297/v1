@@ -1,0 +1,11 @@
+# Training extras — install on top of requirements.txt.
+# Pinned to the versions used for the released v1-7B checkpoint.
+transformers==4.50.0
+trl==0.16.1
+deepspeed==0.16.5
+accelerate==1.6.0
+tyro==0.9.18
+qwen-vl-utils==0.0.10
+datasets
+wandb
+tqdm
