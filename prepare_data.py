@@ -10,7 +10,7 @@ import json
 from pathlib import Path
 
 import tyro
-from datasets import load_dataset
+from datasets import Image, load_dataset
 from tqdm import tqdm
 
 IMAGE_PLACEHOLDER = "<image>\n"
@@ -26,22 +26,33 @@ def main(
     image_dir.mkdir(parents=True, exist_ok=True)
 
     ds = load_dataset(repo_id, split="train", num_proc=num_proc)
+    ds = ds.cast_column("image", Image(decode=False))
 
-    items = []
-    for row in tqdm(ds, desc="materializing v1g"):
-        idx = row["id"]
-        image_path = image_dir / f"{idx}.png"
-        if not image_path.exists():
-            row["image"].save(image_path)
+    ann_path = out / "v1g_train.json"
+    count = 0
+    with open(ann_path, "w") as f:
+        f.write("[")
+        for row in tqdm(ds, desc="materializing v1g"):
+            idx = row["id"]
+            image_path = image_dir / f"{idx}.png"
+            if not image_path.exists():
+                image_bytes = row["image"]["bytes"]
+                if image_bytes is None:
+                    raise ValueError(f"row {idx}: image bytes are not embedded")
+                image_path.write_bytes(image_bytes)
 
-        human, gpt = row["conversations"][0], row["conversations"][1]
-        assert human["from"] == "human" and gpt["from"] == "gpt"
-        user_text = human["value"]
-        if user_text.startswith(IMAGE_PLACEHOLDER):
+            conversations = row["conversations"]
+            if len(conversations) != 2:
+                raise ValueError(f"row {idx}: expected exactly two conversation turns")
+            human, gpt = conversations
+            if human["from"] != "human" or gpt["from"] != "gpt":
+                raise ValueError(f"row {idx}: expected human/gpt conversation roles")
+            user_text = human["value"]
+            if not user_text.startswith(IMAGE_PLACEHOLDER):
+                raise ValueError(f"row {idx}: missing {IMAGE_PLACEHOLDER!r} prefix")
             user_text = user_text[len(IMAGE_PLACEHOLDER) :]
 
-        items.append(
-            {
+            item = {
                 "index": int(idx),
                 "conversation": [
                     {
@@ -60,12 +71,12 @@ def main(
                 "image_size": row["image_size"],
                 "num_tokens": row["num_tokens"],
             }
-        )
-
-    ann_path = out / "v1g_train.json"
-    with open(ann_path, "w") as f:
-        json.dump(items, f)
-    print(f"wrote {len(items)} items to {ann_path}, images in {image_dir}")
+            if count:
+                f.write(",")
+            json.dump(item, f)
+            count += 1
+        f.write("]")
+    print(f"wrote {count} items to {ann_path}, images in {image_dir}")
 
 
 if __name__ == "__main__":
