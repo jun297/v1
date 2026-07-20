@@ -120,6 +120,13 @@ class V1GDataset(torch.utils.data.Dataset):
 
         bbox_dt = json.loads(row["regions"])
         conversations = row["conversations"]
+        if isinstance(conversations, dict):
+            conversations = [
+                {"from": role, "value": value}
+                for role, value in zip(
+                    conversations["from"], conversations["value"], strict=True
+                )
+            ]
         if len(conversations) != 2:
             raise ValueError(f"row {row['id']}: expected exactly two conversation turns")
         human, gpt = conversations
