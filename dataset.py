@@ -1,10 +1,10 @@
 from typing import Optional, Callable
 import math
 import json
-from pathlib import Path
 
 import torch
 
+IMAGE_PLACEHOLDER = "<image>\n"
 IMAGE_FACTOR = 28
 MIN_PIXELS = 4 * 28 * 28
 MAX_PIXELS = 16384 * 28 * 28
@@ -76,8 +76,7 @@ def postprocess_fn(example, region, image_size, processor):
 class V1GDataset(torch.utils.data.Dataset):
     def __init__(
         self,
-        ann_path: str,
-        image_dir: str,
+        data,
         max_image_size: int = 672,
         postprocess_fn: Optional[Callable] = None,
         debug: bool = False,
@@ -89,14 +88,7 @@ class V1GDataset(torch.utils.data.Dataset):
         self.max_image_size = max_image_size
         self.fix_image_size = fix_image_size
 
-        self.image_dir = Path(image_dir)
-
-        assert self.image_dir.is_dir()
-
-        with open(ann_path) as f:
-            data = json.load(f)
         print(f"v1g dataset: loaded {len(data)} items")
-
         self.data = data
 
     def __len__(self):
@@ -126,21 +118,46 @@ class V1GDataset(torch.utils.data.Dataset):
     def __getitem__(self, idx: int):
         row = self.data[idx]
 
-        bbox_dt = row["regions"]
-        conv = row["conversation"]
+        bbox_dt = json.loads(row["regions"])
+        conversations = row["conversations"]
+        if len(conversations) != 2:
+            raise ValueError(f"row {row['id']}: expected exactly two conversation turns")
+        human, gpt = conversations
+        if human["from"] != "human" or gpt["from"] != "gpt":
+            raise ValueError(f"row {row['id']}: expected human/gpt conversation roles")
+        user_text = human["value"]
+        if not user_text.startswith(IMAGE_PLACEHOLDER):
+            raise ValueError(
+                f"row {row['id']}: missing {IMAGE_PLACEHOLDER!r} prefix"
+            )
 
-        image = conv[0]["content"][0]["image"]
-        image = str(self.image_dir / Path(image).name)
-        conv[0]["content"][0]["image"] = image
+        conv = [
+            {
+                "role": "user",
+                "content": [
+                    {"type": "image", "image": row["image"]},
+                    {
+                        "type": "text",
+                        "text": user_text[len(IMAGE_PLACEHOLDER) :],
+                    },
+                ],
+            },
+            {
+                "role": "assistant",
+                "content": [{"type": "text", "text": gpt["value"]}],
+            },
+        ]
+
+        original_image_size = tuple(row["image_size"])
 
         if self.fix_image_size is not None:
             image_size = (self.fix_image_size, self.fix_image_size)
         else:
-            image_size = self.resize_image(row["image_size"])
+            image_size = self.resize_image(original_image_size)
 
-        if image_size != row["image_size"]:
+        if image_size != original_image_size:
             bbox_dt = {
-                k: self.resize_bbox(bbox, row["image_size"], image_size)
+                k: self.resize_bbox(bbox, original_image_size, image_size)
                 for k, bbox in bbox_dt.items()
             }
 

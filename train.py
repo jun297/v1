@@ -1,5 +1,4 @@
 import os
-import json
 import inspect
 
 os.environ["TOKENIZERS_PARALLELISM"] = "false"
@@ -11,6 +10,7 @@ from functools import partial
 
 import tyro
 import torch
+from datasets import load_dataset
 
 from trl import SFTConfig, SFTTrainer
 import wandb
@@ -25,9 +25,7 @@ class Config:
     model: str = "Qwen/Qwen2.5-VL-7B-Instruct"
     resume_from_checkpoint: Optional[str] = None
 
-    data: str = "data/v1g_train.json"
-    eval_data: str = "data/v1g_eval_samples.json"
-    image_dir: Optional[str] = "data/images"
+    data: str = "kjunh/v1g"
     max_image_size: int = 672
     fix_image_size: Optional[int] = None  # Set to 448 for 448x448 fixed size
 
@@ -77,18 +75,6 @@ if args.z_loss_weight > 0 and args.separate_copy_loss:
         "z_loss_weight > 0 when separate_copy_loss True occurs error, known issue in v1/modeling_v1.py"
     )
 
-# build sample data
-eval_path = Path(args.eval_data)
-if not os.path.exists(eval_path):
-    print(f"building dummy eval data at: {eval_path}")
-    with open(args.data) as f:
-        data = json.load(f)
-    with open(eval_path, "w") as f:
-        json.dump(data[:8], f)
-    print(f"built dummy eval data at: {eval_path}")
-
-    del data
-
 exp_name = args.run_name if args.run_name else build_exp_name(args)
 
 out_dir = Path(args.cache_dir) / exp_name
@@ -128,17 +114,19 @@ if "max_seq_length" in inspect.signature(collate_fn).parameters:
     collate_kwargs["max_seq_length"] = args.max_seq_length
 _collate_fn = partial(collate_fn, **collate_kwargs)
 
+print(f"loading training data from: {args.data}")
+data = load_dataset(args.data, split="train")
+eval_data = data.select(range(min(8, len(data))))
+
 train_dataset = V1GDataset(
-    args.data,
-    image_dir=args.image_dir,
+    data,
     max_image_size=args.max_image_size,
     postprocess_fn=_postprocess_fn,
     debug=args.debug,
     fix_image_size=args.fix_image_size,
 )
 val_dataset = V1GDataset(
-    args.eval_data,
-    image_dir=args.image_dir,
+    eval_data,
     max_image_size=args.max_image_size,
     postprocess_fn=_postprocess_fn,
     debug=args.debug,

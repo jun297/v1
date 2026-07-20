@@ -56,6 +56,9 @@ from datasets import load_dataset
 ds = load_dataset("kjunh/v1g")
 ```
 
+Each Parquet row contains the embedded image, ShareGPT-style `human`/`gpt`
+`conversations`, and the corresponding grounding `regions`.
+
 ## Training
 
 Install the training extras on top of the base requirements:
@@ -63,10 +66,9 @@ Install the training extras on top of the base requirements:
 pip install -r requirements-train.txt
 ```
 
-Materialize the dataset into the local layout expected by the trainer (`data/images/` + `data/v1g_train.json`, needs ~90GB free disk):
-```bash
-python prepare_data.py
-```
+The trainer loads the Parquet dataset directly from the Hub. Hugging Face caches
+the downloaded shards locally; set `HF_HOME` if the cache should live on a
+specific scratch disk.
 
 Launch training (8×GPU with DeepSpeed ZeRO-3, the configuration used for the released v1-7B):
 ```bash
