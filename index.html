@@ -59,29 +59,28 @@
 <section class="section" id="pointcopy">
   <p class="eyebrow">point-and-copy</p>
   <h2>Reasoning that revisits the image</h2>
-  <p class="lede">A real trace from the <a href="https://huggingface.co/datasets/kjunh/v1g">v1g</a> training set. As the model works through the problem, each <code class="inline">detect(&hellip;)</code> call grounds the next step in a region of the image. <span class="hint">Hover or focus an <span class="obj-demo">&#10216;obj&#10217;</span> token to see where it points.</span></p>
+  <p class="lede">A real trace from the <a href="https://huggingface.co/datasets/kjunh/v1g">v1g</a> training set. As the model works through the problem, each <code class="inline">detect(&hellip;)</code> call grounds the next step in a region of the image. <span class="hint">Hover or focus an <span class="obj-demo">&#10216;obj&#10217;</span> token to see the referenced object. Overlays are tightened for visualization.</span></p>
 
   <div class="demo">
     <div class="demo-image">
-      <p class="task"><span class="task-tag">task</span> AB is tangent to circle O at A, and &ang;AOB&nbsp;=&nbsp;70&deg;. Find &ang;B. <span class="choices">A:&nbsp;10&deg; &nbsp;B:&nbsp;20&deg; &nbsp;C:&nbsp;30&deg; &nbsp;D:&nbsp;35&deg;</span></p>
-      <svg viewBox="0 0 280 168" role="img" aria-label="Geometry diagram: circle O with tangent line AB touching at point A">
-        <image href="assets/sample_748.png" x="0" y="0" width="280" height="168" preserveAspectRatio="none"/>
-        <rect id="box-1" class="box box-1" x="70"  y="19" width="140" height="141"/>
-        <rect id="box-2" class="box box-2" x="128" y="59" width="82"  height="73"/>
-        <rect id="box-3" class="box box-3" x="23"  y="0"  width="234" height="156"/>
-        <rect id="box-4" class="box box-4" x="23"  y="0"  width="256" height="167"/>
-        <rect id="box-5" class="box box-5" x="0"   y="0"  width="279" height="167"/>
+      <p class="task"><span class="task-tag">task</span> In this food chain, identify the trophic level of each organism and explain how energy flows from the producer to the tertiary consumer.</p>
+      <svg viewBox="0 0 574 154" role="img" aria-label="Food chain showing seagrass, sea squirt, butterfish, and weakfish">
+        <image href="assets/sample_96014.png" x="0" y="0" width="574" height="154"/>
+        <rect id="box-1" class="box box-1" x="3"   y="23" width="123" height="109"/>
+        <rect id="box-2" class="box box-2" x="158" y="0"  width="118" height="135"/>
+        <rect id="box-3" class="box box-3" x="303" y="35" width="121" height="85"/>
+        <rect id="box-4" class="box box-4" x="451" y="25" width="122" height="83"/>
       </svg>
     </div>
 
     <div class="demo-trace">
-      <p>I know that a tangent to a circle is perpendicular to the radius at the point of tangency. So, I need to look at the tangent line AB.</p>
-      <p class="detect">detect(query="tangent line AB", objects=[<button class="obj obj-1" data-obj="1">&#10216;obj1&#10217;</button>])</p>
-      <p>Since <button class="obj obj-1" data-obj="1">&#10216;obj1&#10217;</button> is tangent to the circle at point A, then OA, which is the radius, should be perpendicular to it. Let me find radius OA.</p>
-      <p class="detect">detect(query="radius OA", objects=[<button class="obj obj-2" data-obj="2">&#10216;obj2&#10217;</button>])</p>
-      <p>That means angle OAB is 90 degrees.</p>
-      <p class="detect">detect(query="angle OAB", objects=[<button class="obj obj-3" data-obj="3">&#10216;obj3&#10217;</button>])<br>detect(query="angle AOB", objects=[<button class="obj obj-4" data-obj="4">&#10216;obj4&#10217;</button>])<br>detect(query="triangle AOB", objects=[<button class="obj obj-5" data-obj="5">&#10216;obj5&#10217;</button>])</p>
-      <p class="conclusion">In a right triangle <button class="obj obj-5" data-obj="5">&#10216;obj5&#10217;</button>, the sum of the angles is 180 degrees. So, angle B = 180&deg; &minus; <button class="obj obj-3" data-obj="3">&#10216;obj3&#10217;</button> &minus; <button class="obj obj-4" data-obj="4">&#10216;obj4&#10217;</button> = 180&deg; &minus; 90&deg; &minus; 70&deg; = <strong>20&deg;</strong>. <span class="answer">&#10003; B</span></p>
+      <p>So I've got this food chain here: seagrass &rarr; sea squirt &rarr; butterfish &rarr; weakfish. To understand it, I need to identify these organisms.</p>
+      <p class="detect">detect(query="seagrass", objects=[<button class="obj obj-1" data-obj="1">&#10216;obj1&#10217;</button>])</p>
+      <p class="detect">detect(query="sea squirt", objects=[<button class="obj obj-2" data-obj="2">&#10216;obj2&#10217;</button>])</p>
+      <p class="detect">detect(query="butterfish", objects=[<button class="obj obj-3" data-obj="3">&#10216;obj3&#10217;</button>])</p>
+      <p class="detect">detect(query="weakfish", objects=[<button class="obj obj-4" data-obj="4">&#10216;obj4&#10217;</button>])</p>
+      <p>The trophic levels progress from <button class="obj obj-1" data-obj="1">&#10216;obj1&#10217;</button> (producer), to <button class="obj obj-2" data-obj="2">&#10216;obj2&#10217;</button> (primary consumer), to <button class="obj obj-3" data-obj="3">&#10216;obj3&#10217;</button> (secondary consumer), and finally <button class="obj obj-4" data-obj="4">&#10216;obj4&#10217;</button> (tertiary consumer).</p>
+      <p class="conclusion">Energy flows from <button class="obj obj-1" data-obj="1">&#10216;obj1&#10217;</button> to <button class="obj obj-4" data-obj="4">&#10216;obj4&#10217;</button>, with energy lost at each transfer. <strong>producer &rarr; primary &rarr; secondary &rarr; tertiary</strong> <span class="answer">&#10003;</span></p>
     </div>
   </div>
 </section>
