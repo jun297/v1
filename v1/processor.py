@@ -507,6 +507,3 @@ def collate_fn(examples, processor):
     batch["labels"] = labels  # Add labels to the batch
 
     return batch  # Return the prepared batch
-
-if __name__ == '__main__':
-    import ipdb; ipdb.set_trace()
