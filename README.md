@@ -47,17 +47,53 @@ python inference.py
 ```
 The script uses a default image URL and text prompt. To use your own inputs, you can modify the `image` variable within the `messages` list and the `text` field for the user prompt.
 
-## Data
-The full [v1g dataset](https://huggingface.co/datasets/kjunh/v1g) (~300K multimodal reasoning traces with interleaved grounding annotations) is available on the Hugging Face Hub, along with a small [100-item sample](https://huggingface.co/datasets/kjunh/v1g-sample) for quick browsing:
+## Training dataset: v1g
+
+[**v1g**](https://huggingface.co/datasets/kjunh/v1g) is the dataset used to
+train the released v1-7B model. It contains 312,373 long-form multimodal
+reasoning traces for mostly mathematical visual problems. The responses
+interleave natural-language reasoning with `detect(...)` calls that connect
+referenced objects to bounding boxes in the image.
+
+| Property | Value |
+|---|---|
+| Examples | 312,373 |
+| Storage | 74 Parquet shards (~33GB download) |
+| Image data | PNG bytes embedded in each row |
+| Dialogue | ShareGPT-style `human` question and `gpt` grounded reasoning trace |
+| Grounding | JSON mapping from `<\|objK\|>` pointer tokens to `[x1, y1, x2, y2]` boxes |
+
+Each row has the following fields:
+
+| Field | Description |
+|---|---|
+| `id` | Unique example identifier |
+| `image` | Decoded problem image |
+| `conversations` | Question and grounded reasoning response |
+| `regions` | JSON-encoded pointer-token-to-box mapping |
+| `image_size` | `[width, height]` coordinate space used by `regions` |
+| `num_tokens` | Approximate trace length |
+
+Load the full training split with Hugging Face Datasets:
 
 ```python
 from datasets import load_dataset
 
-ds = load_dataset("kjunh/v1g")
+dataset = load_dataset("kjunh/v1g", split="train")
+example = dataset[0]
+print(example["id"], example["image"].size, example["image_size"])
 ```
 
-Each Parquet row contains the embedded image, ShareGPT-style `human`/`gpt`
-`conversations`, and the corresponding grounding `regions`.
+The images stay inside the Parquet data, so no JSON or PNG materialization step
+is required. Hugging Face caches the downloaded shards locally; set `HF_HOME`
+to place the ~33GB cache on a scratch disk. A
+[100-item sample](https://huggingface.co/datasets/kjunh/v1g-sample) is available
+for inspecting the schema or running a quick data-path check.
+
+The v1g reasoning traces and grounding annotations are released under
+Apache-2.0. The embedded images retain the licenses and terms of their source
+datasets; see the [dataset card](https://huggingface.co/datasets/kjunh/v1g) for
+provenance details.
 
 ## Training
 
@@ -66,17 +102,16 @@ Install the training extras on top of the base requirements:
 pip install -r requirements-train.txt
 ```
 
-The trainer loads the Parquet dataset directly from the Hub. Hugging Face caches
-the downloaded shards locally; set `HF_HOME` if the cache should live on a
-specific scratch disk.
+By default, `train.py` loads `kjunh/v1g` directly from the Hub and adapts its
+ShareGPT conversations and grounding regions lazily during training.
 
 Launch training (8×GPU with DeepSpeed ZeRO-3, the configuration used for the released v1-7B):
 ```bash
 bash train.sh
 ```
-Single-GPU debug run:
+Small-data debug run using the public 100-item sample:
 ```bash
-python train.py --debug --max_steps 3 --batch_size 1
+python train.py --data kjunh/v1g-sample --debug --max-steps 3 --batch-size 1
 ```
 
 **Reproducibility notes**
