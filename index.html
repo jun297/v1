@@ -2,6 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
+<script>document.documentElement.classList.add("js");</script>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>v1 — Learning to Point Visual Tokens for Multimodal Grounded Reasoning</title>
 <meta name="description" content="v1 is a lightweight extension for active visual referencing via point-and-copy: the model selects relevant image patches and copies their embeddings back into the reasoning stream. COLM 2026.">
@@ -12,6 +13,10 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;600&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+<link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+<link rel="icon" href="assets/favicon.ico" sizes="48x48">
+<link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
+<meta name="theme-color" content="#fbfcf8">
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -51,9 +56,68 @@
 
 <main>
 
-<figure class="teaser">
-  <img src="assets/figure.png" alt="Overview of v1: while reasoning, the model points at relevant image patches and copies their embeddings back into the reasoning stream.">
-  <figcaption>Most multimodal language models encode an image once, then reason purely in text. v1 keeps looking: it points at the patches that matter and copies them back into its chain of thought.</figcaption>
+<figure class="teaser" id="teaser">
+  <noscript><img class="teaser-static" src="assets/figure.png" alt="Overview of v1: while reasoning, the model points at relevant image patches and copies their embeddings back into the reasoning stream."></noscript>
+
+  <div class="fig" id="fig" aria-label="Interactive overview: standard text-based reasoning versus v1 point-and-copy, one generating step at a time">
+    <div class="fig-input">
+      <div class="fig-head">Input</div>
+      <div class="fig-diagram" id="fig-diagram">
+        <img src="assets/diagram_rst.png" alt="Triangle RST on a patch grid. Side RS is labelled 2z minus 15, side RT is 9, side ST is 7. The angles at S and T carry matching marks." width="584" height="672">
+        <div class="cells" id="fig-cells" aria-hidden="true"></div>
+      </div>
+      <p class="fig-q"><b>Question:</b> Based on this diagram, find the value of z.</p>
+      <p class="fig-choices"><span>(A) 7</span><span>(B) 9</span><span>(C) 12</span><span>(D) 15</span></p>
+      <div class="fig-tokens" aria-hidden="true">
+        <span class="fig-tokens-label">tokens</span>
+        <span class="tok tok-img" style="--c:0;--r:0"></span><span class="tok tok-img" style="--c:1;--r:0"></span><span class="tok tok-img" style="--c:5;--r:1"></span><span class="tok tok-img" style="--c:1;--r:4"></span><span class="tok tok-img" style="--c:5;--r:6"></span><span class="tok-more">&hellip;</span><span class="tok tok-txt"></span><span class="tok tok-txt"></span><span class="tok tok-txt"></span><span class="tok-more">&hellip;</span>
+      </div>
+    </div>
+
+    <div class="fig-mllm" aria-hidden="true"><span>MLLM</span></div>
+
+    <div class="fig-panels">
+      <div class="fig-colheads" aria-hidden="true">
+        <span>output distribution at generating step <i>t</i></span>
+        <span>reasoning process</span>
+      </div>
+
+      <section class="panel panel-std" data-panel="std">
+        <h3 class="panel-title">Standard approach <span class="panel-sub">text-based reasoning</span></h3>
+        <div class="panel-body">
+          <div class="chart">
+            <p class="chart-formula">logit<sub>gen</sub> &isin; &#8477;<sup>|V|</sup></p>
+            <svg class="bars" viewBox="0 0 360 150" role="img" aria-label="Next-token distribution over text tokens"></svg>
+            <p class="chart-status"><span class="chart-kind chart-kind-txt">text token distribution</span> <span class="chart-out"></span></p>
+          </div>
+          <div class="trace" aria-live="polite"><span class="trace-empty">&hellip;</span></div>
+        </div>
+      </section>
+
+      <section class="panel panel-v1" data-panel="v1">
+        <h3 class="panel-title">v1 <span class="panel-sub">point-and-copy reasoning</span></h3>
+        <div class="panel-body">
+          <div class="chart">
+            <p class="chart-formula">logit<sub>t</sub> = [ logit<sub>gen</sub> &#8214; logit<sub>ptr</sub> ] &isin; &#8477;<sup>|V|+K</sup></p>
+            <svg class="bars" viewBox="0 0 360 150" role="img" aria-label="Next-token distribution over text tokens and the K visual tokens of the input image"></svg>
+            <p class="chart-status"><span class="chart-kind chart-kind-txt">text</span> <span class="chart-plus">+</span> <span class="chart-kind chart-kind-img">copy token distribution</span> <span class="chart-out"></span></p>
+          </div>
+          <div class="trace" aria-live="polite"><span class="trace-empty">&hellip;</span></div>
+        </div>
+      </section>
+    </div>
+  </div>
+
+  <div class="fig-controls" id="fig-controls">
+    <button class="fig-btn" id="fig-play" aria-label="Play">play</button>
+    <button class="fig-btn" id="fig-back" aria-label="Previous step">&larr;</button>
+    <button class="fig-btn" id="fig-step" aria-label="Next step">&rarr;</button>
+    <div class="fig-scrub" id="fig-scrub" role="group" aria-label="Generating step"></div>
+    <span class="fig-t">t = <b id="fig-t">0</b></span>
+    <button class="fig-btn fig-btn-ghost" id="fig-reset">reset</button>
+  </div>
+
+  <figcaption>Most multimodal language models encode an image once, then reason purely in text. v1 keeps looking: it points at the patches that matter and copies them back into its chain of thought. <span class="hint">Press play, or hover a copied patch to see where it came from.</span> <a class="static-link" href="assets/figure.png">Static figure</a></figcaption>
 </figure>
 
 <section class="section" id="pointcopy">
@@ -138,6 +202,7 @@
   <p>Yonsei University &middot; Released under <a href="https://github.com/jun297/v1/blob/main/LICENSE">Apache-2.0</a></p>
 </footer>
 
+<script src="teaser.js" defer></script>
 <script>
   const boxes = {};
   document.querySelectorAll(".box").forEach(b => { boxes[b.id.slice(4)] = b; });
