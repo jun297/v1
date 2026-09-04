@@ -29,22 +29,22 @@
   STD.verdict = { text: "answer (C) 12 — but ∠RTS is not a right angle: the model never re-checked the diagram.", cls: "bad" };
 
   // Visual-token slots shown in the v1 chart (fixed order so bars animate in place).
-  const S_ANG = [1, 4], T_ANG = [5, 6], NINE = [6, 3], LBL = [1, 2];
+  const S_ANG = [1, 4], T_ANG = [5, 6], R_ANG = [5, 1], NINE = [6, 3];
   const V1 = [
     { pre: "I’ve got a triangle diagram here. … according to", key: P(...S_ANG), tail: ",",
-      cands: [T("the", .08), T("angle", .06), T("right", .05), T("side", .03), T("triangle", .02), P(...S_ANG, .48), P(...T_ANG, .14), P(...NINE, .09), P(...LBL, .05)] },
+      cands: [T("the", .08), T("angle", .06), T("right", .05), T("side", .03), T("triangle", .02), P(...S_ANG, .48), P(...T_ANG, .14), P(...R_ANG, .09), P(...NINE, .05)] },
     { pre: "", key: P(...T_ANG), tail: ", and",
-      cands: [T("angle", .07), T("and", .06), T("the", .04), T("side", .03), T("vertex", .02), P(...S_ANG, .10), P(...T_ANG, .55), P(...NINE, .09), P(...LBL, .04)] },
-    { pre: "", key: P(...NINE), tail: "…",
-      cands: [T("side", .06), T("length", .05), T("the", .04), T("angle", .03), T("9", .03), P(...S_ANG, .10), P(...T_ANG, .12), P(...NINE, .51), P(...LBL, .06)] },
+      cands: [T("angle", .07), T("and", .06), T("the", .04), T("side", .03), T("vertex", .02), P(...S_ANG, .10), P(...T_ANG, .55), P(...R_ANG, .09), P(...NINE, .04)] },
+    { pre: "", key: P(...R_ANG), tail: "…",
+      cands: [T("vertex", .06), T("apex", .05), T("the", .04), T("angle", .03), T("R", .03), P(...S_ANG, .10), P(...T_ANG, .12), P(...R_ANG, .51), P(...NINE, .06)] },
     { pre: "we can notice that triangle RST is", key: "isosceles", tail: ", with RS = RT.", cls: "ok",
-      cands: [T("isosceles", .66), T("a", .09), T("right", .06), T("equilateral", .04), T("scalene", .02), P(...S_ANG, .05), P(...T_ANG, .04), P(...NINE, .03), P(...LBL, .01)] },
+      cands: [T("isosceles", .66), T("a", .09), T("right", .06), T("equilateral", .04), T("scalene", .02), P(...S_ANG, .05), P(...T_ANG, .04), P(...R_ANG, .03), P(...NINE, .01)] },
     { pre: "Thus, 2z − 15 = 9 → 2z = 24 →", key: "z = 12", tail: ".", cls: "ok",
-      cands: [T("z=12", .81), T("z", .07), T("12", .05), T("z=24", .02), T("2z", .01), P(...S_ANG, .02), P(...T_ANG, .01), P(...NINE, .01), P(...LBL, .00)] },
+      cands: [T("z=12", .81), T("z", .07), T("12", .05), T("z=24", .02), T("2z", .01), P(...S_ANG, .02), P(...T_ANG, .01), P(...R_ANG, .01), P(...NINE, .00)] },
     { pre: "All in all, the answer is", key: "(C) z = 12", tail: ".", cls: "ans ok",
-      cands: [T("(C)", .78), T("C", .09), T("(B)", .04), T("12", .03), T("option", .02), P(...S_ANG, .02), P(...T_ANG, .01), P(...NINE, .01), P(...LBL, .00)] },
+      cands: [T("(C)", .78), T("C", .09), T("(B)", .04), T("12", .03), T("option", .02), P(...S_ANG, .02), P(...T_ANG, .01), P(...R_ANG, .01), P(...NINE, .00)] },
   ];
-  V1.verdict = { text: "answer (C) z = 12 — the matching angle marks at S and T were copied into the trace before the claim RS = RT.", cls: "ok" };
+  V1.verdict = { text: "answer (C) z = 12 — the angle marks at S and T and the apex R were copied into the trace before the claim RS = RT.", cls: "ok" };
 
   const N = STD.length;
   const STEP_MS = 1900;
