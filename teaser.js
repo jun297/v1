@@ -104,7 +104,7 @@
       if (isImg) {
         // nested svg with a viewBox crops the diagram to one patch
         label = document.createElementNS(SVG_NS, "svg");
-        const s = Math.min(bw, 22);
+        const s = Math.min(bw, 27);
         label.setAttribute("x", x + (bw - s) / 2); label.setAttribute("y", BASE + 8); label.setAttribute("width", s); label.setAttribute("height", s);
         label.setAttribute("preserveAspectRatio", "none");
         const img = document.createElementNS(SVG_NS, "image");

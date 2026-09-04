@@ -145,14 +145,20 @@ html:not(.js) .fig, html:not(.js) .fig-controls { display: none; }
 .static-link { color: var(--muted); font-size: 0.8rem; margin-left: 0.35em; }
 
 .fig {
-  --txt: #d7dbe2;      /* text-token bars */
-  --txt-max: #5c6577;
-  --img: #f6cdc1;      /* copy-token bars */
-  --img-max: var(--obj1);
-  --bad-bg: #fbe3de;
-  --bad: #b8371b;
-  --ok-bg: #dcf3ec;
-  --ok: #0b6b6a;
+  /* colors sampled from the paper figure */
+  --std: #fb8500;      /* standard approach: orange */
+  --v1: #5674fb;       /* v1: blue */
+  --grey: #6b757c;     /* input / MLLM */
+  --txt: #ffbcbc;      /* text-token bars */
+  --txt-max: #fb9726;
+  --img: #b3c0fd;      /* copy-token bars */
+  --img-max: #6782fb;
+  --bad-bg: #ffc7c7;
+  --bad: #4b1414;
+  --bad-strong: #b8371b;
+  --ok-bg: #cff1de;
+  --ok: #14532d;
+  --ok-strong: #1d7a4a;
   display: grid;
   grid-template-columns: 230px 40px minmax(0, 1fr);
   gap: 0.7rem;
@@ -174,7 +180,7 @@ html:not(.js) .fig, html:not(.js) .fig-controls { display: none; }
   font-size: 0.9rem;
   text-align: center;
   color: #fff;
-  background: var(--muted);
+  background: var(--grey);
   border-radius: 4px 4px 0 0;
   padding: 0.15em 0;
   margin-bottom: -0.5rem;
@@ -190,13 +196,13 @@ html:not(.js) .fig, html:not(.js) .fig-controls { display: none; }
   grid-template-rows: repeat(8, 1fr);
 }
 .cell { transition: background 0.2s, box-shadow 0.2s; }
-.cell.on { background: rgba(228, 87, 46, 0.22); box-shadow: inset 0 0 0 2px var(--obj1); }
-.cell.hot { background: rgba(228, 87, 46, 0.32); box-shadow: inset 0 0 0 2.5px var(--obj1), 0 0 0 2px #fff; z-index: 1; }
-.cells.focused .cell.on:not(.hot) { background: rgba(228, 87, 46, 0.08); box-shadow: inset 0 0 0 1px rgba(228, 87, 46, 0.5); }
+.cell.on { background: rgba(86, 116, 251, 0.22); box-shadow: inset 0 0 0 2px var(--v1); }
+.cell.hot { background: rgba(86, 116, 251, 0.34); box-shadow: inset 0 0 0 2.5px var(--v1), 0 0 0 2px #fff; z-index: 1; }
+.cells.focused .cell.on:not(.hot) { background: rgba(86, 116, 251, 0.08); box-shadow: inset 0 0 0 1px rgba(86, 116, 251, 0.5); }
 .cell.flash { animation: cell-flash 0.8s ease-out; }
 @keyframes cell-flash {
-  0%   { background: rgba(228, 87, 46, 0.6); }
-  100% { background: rgba(228, 87, 46, 0.22); }
+  0%   { background: rgba(86, 116, 251, 0.6); }
+  100% { background: rgba(86, 116, 251, 0.22); }
 }
 
 .fig-q { font-size: 0.8rem; line-height: 1.45; }
@@ -210,7 +216,7 @@ html:not(.js) .fig, html:not(.js) .fig-controls { display: none; }
   font-family: var(--mono); font-size: 0.65rem; text-transform: uppercase; letter-spacing: 0.08em;
   color: var(--muted); margin-right: 0.3rem;
 }
-.tok { width: 16px; height: 16px; border-radius: 2px; display: inline-block; }
+.tok { width: 20px; height: 20px; border-radius: 2px; display: inline-block; }
 .tok-img, .pchip {
   background-image: url("assets/diagram_rst.png");
   background-size: 700% 800%;
@@ -224,7 +230,7 @@ html:not(.js) .fig, html:not(.js) .fig-controls { display: none; }
 
 .fig-mllm {
   display: flex; align-items: center; justify-content: center;
-  background: var(--muted); color: #fff; border-radius: 4px;
+  background: var(--grey); color: #fff; border-radius: 4px;
   font-family: var(--display); font-weight: 700; font-size: 0.85rem;
 }
 .fig-mllm span { writing-mode: vertical-rl; transform: rotate(180deg); letter-spacing: 0.08em; }
@@ -239,13 +245,13 @@ html:not(.js) .fig, html:not(.js) .fig-controls { display: none; }
   font-family: var(--mono); font-size: 0.65rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted);
 }
 
-.panel { border: 1.5px solid var(--muted); border-radius: 6px; overflow: hidden; }
-.panel-v1 { border-color: var(--obj1); }
+.panel { border: 2px solid var(--std); border-radius: 6px; overflow: hidden; }
+.panel-v1 { border-color: var(--v1); }
 .panel-title {
   font-family: var(--display); font-weight: 700; font-size: 0.9rem; line-height: 1.3;
-  color: #fff; background: var(--muted); padding: 0.25em 0.7rem;
+  color: #fff; background: var(--std); padding: 0.25em 0.7rem;
 }
-.panel-v1 .panel-title { background: var(--obj1); }
+.panel-v1 .panel-title { background: var(--v1); }
 .panel-sub { font-family: var(--mono); font-weight: 400; font-size: 0.72rem; opacity: 0.9; margin-left: 0.4em; }
 
 .panel-body {
@@ -268,13 +274,13 @@ html:not(.js) .fig, html:not(.js) .fig-controls { display: none; }
 .bar-label { font-family: var(--mono); font-size: 9.5px; fill: var(--muted); text-anchor: end; }
 .argmax .bar-label { fill: var(--ink); font-weight: 500; }
 .thumb-frame { fill: none; stroke: var(--rule); stroke-width: 1; }
-.bar-img.argmax .thumb-frame { stroke: var(--obj1); stroke-width: 1.5; }
+.bar-img.argmax .thumb-frame { stroke: var(--v1); stroke-width: 1.5; }
 .bar-img { cursor: crosshair; }
 
 .chart-status { font-family: var(--mono); font-size: 0.68rem; color: var(--muted); margin-top: 0.15rem; line-height: 1.6; }
 .chart-kind { padding: 0.05em 0.45em; border-radius: 3px; color: #fff; white-space: nowrap; }
-.chart-kind-txt { background: var(--txt-max); }
-.chart-kind-img { background: var(--obj1); }
+.chart-kind-txt { background: var(--std); }
+.chart-kind-img { background: var(--v1); }
 .chart-plus { font-weight: 500; color: var(--ink); }
 .chart-out { display: block; min-height: 1.6em; }
 .chart-out b { color: var(--ink); font-weight: 500; }
@@ -294,11 +300,11 @@ html:not(.js) .fig, html:not(.js) .fig-controls { display: none; }
 .key.ok  { background: var(--ok-bg);  color: var(--ok);  border-color: transparent; font-weight: 500; }
 .key.ans { font-weight: 500; }
 .pchip {
-  display: inline-block; width: 1.25em; height: 1.25em; vertical-align: -0.3em;
-  border: 1.5px solid var(--obj1); border-radius: 3px; background-color: #fff;
+  display: inline-block; width: 1.75em; height: 1.75em; vertical-align: -0.5em;
+  border: 1.5px solid var(--v1); border-radius: 3px; background-color: #fff;
   cursor: crosshair; margin: 0 0.1em;
 }
-.pchip:hover, .pchip:focus-visible { box-shadow: 0 0 0 2px rgba(228, 87, 46, 0.35); }
+.pchip:hover, .pchip:focus-visible { box-shadow: 0 0 0 2px rgba(86, 116, 251, 0.35); }
 .latest .key, .latest .pchip { animation: pop 0.5s ease-out; }
 @keyframes pop {
   0%   { transform: scale(1.25); }
@@ -309,8 +315,8 @@ html:not(.js) .fig, html:not(.js) .fig-controls { display: none; }
   margin-top: 0.6rem; padding-top: 0.5rem; border-top: 1px dashed var(--rule);
   animation: fade 0.5s ease-out;
 }
-.verdict.bad { color: var(--bad); }
-.verdict.ok  { color: var(--ok); }
+.verdict.bad { color: var(--bad-strong); }
+.verdict.ok  { color: var(--ok-strong); }
 @keyframes fade { from { opacity: 0; } to { opacity: 1; } }
 
 /* --- controls --- */
